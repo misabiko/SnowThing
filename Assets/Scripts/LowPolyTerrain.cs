@@ -3,7 +3,6 @@
 [RequireComponent(typeof(MeshFilter))]
 public class LowPolyTerrain : MonoBehaviour {
 	Mesh mesh;
-
 	Vector3[] vertices;
 	int[] triangles;
 
@@ -66,14 +65,30 @@ public class LowPolyTerrain : MonoBehaviour {
 		}
 	}
 
-	void UpdateMesh() {
-		mesh.Clear();
+	void UpdateMesh(bool updateTriangles = true) {
+		if (updateTriangles)
+			mesh.Clear();
 
 		mesh.vertices = vertices;
-		mesh.triangles = triangles;
+		
+		if (updateTriangles)
+			mesh.triangles = triangles;
+		else
+			mesh.RecalculateBounds();
 		
 		mesh.RecalculateNormals();
 		
 		GetComponent<MeshCollider>().sharedMesh = mesh;
+	}
+
+	public void DrawHeight(Vector3 position, float height, float radius) {
+		float radiusSquared = radius * radius;
+		
+		for (int i = 0; i < vertices.Length; i++) {
+			if ((vertices[i] - position).sqrMagnitude <= radiusSquared)
+				vertices[i].y += height;
+		}
+		
+		UpdateMesh(false);
 	}
 }
