@@ -7,8 +7,9 @@ public class LowPolyTerrain : MonoBehaviour {
 	Vector3[] vertices;
 	int[] triangles;
 
-	public int xSize = 20;
-	public int zSize = 20;
+	public float resolution = 0.25f;
+	public int xSize = 250;
+	public int zSize = 250;
 	
 	void Start() {
 		UpdateTerrain();
@@ -40,7 +41,7 @@ public class LowPolyTerrain : MonoBehaviour {
 		float halfZSize = ((float) zSize) / 2;
 		for (int z = 0, i = 0; z <= zSize; z++)
 			for (int x = 0; x <= xSize; x++) {
-				vertices[i] = new Vector3(x - halfXSize, 0, z - halfZSize);
+				vertices[i] = new Vector3(x - halfXSize, 0, z - halfZSize) * resolution;
 				i++;
 			}
 
