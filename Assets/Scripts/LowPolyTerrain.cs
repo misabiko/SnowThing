@@ -9,21 +9,38 @@ public class LowPolyTerrain : MonoBehaviour {
 
 	public int xSize = 20;
 	public int zSize = 20;
-
+	
 	void Start() {
-		mesh = new Mesh();
-		GetComponent<MeshFilter>().mesh = mesh;
-		
+		UpdateTerrain();
+	}
+
+	void OnValidate() {
+		UpdateTerrain();
+	}
+
+	void UpdateTerrain() {
+		InitMesh();
+
 		CreateShape();
 		UpdateMesh();
+	}
+
+	void InitMesh() {
+		if (mesh != null)
+			return;
+		
+		mesh = new Mesh();
+		GetComponent<MeshFilter>().mesh = mesh;
 	}
 
 	void CreateShape() {
 		vertices = new Vector3[(xSize + 1) * (zSize + 1)];
 
+		float halfXSize = ((float) xSize) / 2;
+		float halfZSize = ((float) zSize) / 2;
 		for (int z = 0, i = 0; z <= zSize; z++)
 			for (int x = 0; x <= xSize; x++) {
-				vertices[i] = new Vector3(x, 0, z);
+				vertices[i] = new Vector3(x - halfXSize, 0, z - halfZSize);
 				i++;
 			}
 
@@ -55,5 +72,7 @@ public class LowPolyTerrain : MonoBehaviour {
 		mesh.triangles = triangles;
 		
 		mesh.RecalculateNormals();
+		
+		GetComponent<MeshCollider>().sharedMesh = mesh;
 	}
 }
