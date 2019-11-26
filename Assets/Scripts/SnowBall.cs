@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityTemplateProjects;
 
 public class SnowBall : MonoBehaviour {
 	Vector2 lastPos;
@@ -12,15 +13,14 @@ public class SnowBall : MonoBehaviour {
 		if (terrain == null)
 			Debug.LogError("LowPolyTerrain wasn't set in SnowBall.");
 		
-		Vector3 pos = transform.position;
-		lastPos = new Vector2(pos.x, pos.z);
+		lastPos = Helper.RemoveY(transform.position);
 
 		radius = transform.localScale.y / 2;
 	}
 
 	void LateUpdate() {
 		Vector3 pos = transform.position;
-		Vector2 newPos = new Vector2(pos.x, pos.z);
+		Vector2 newPos = Helper.RemoveY(pos);
 
 		deltaPos += Vector2.Distance(lastPos, newPos);
 		lastPos = newPos;
