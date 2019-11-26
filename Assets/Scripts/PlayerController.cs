@@ -21,9 +21,6 @@ public class PlayerController : MonoBehaviour {
 	public float ballPush = 10f;
 	public float pushRadius = 1f;
 	public Rigidbody snowBall;
-
-	public Slider slider;
-	public TextMeshProUGUI text;
 	
 	void Start() {
 		characterController = GetComponent<CharacterController>();
@@ -50,8 +47,7 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnFire(InputAction.CallbackContext context) {
-		if (context.phase == InputActionPhase.Started)
-			Debug.Log("OnFire: " + context.valueType);
+		Debug.Log("OnFire: " + context.valueType);
 	}
 
 	void Update() {
@@ -60,9 +56,7 @@ public class PlayerController : MonoBehaviour {
 			cam.m_XAxis.Value += camXSensitivity * lookInput.x;
 			cam.m_YAxis.Value -= camYSensitivity * lookInput.y;
 		}
-
 		
-		slider.value = 0;
 		if (moveInput != Vector2.zero) {
 			Vector3 direction = camTransform.forward * moveInput.y + camTransform.right * moveInput.x;
 			characterController.SimpleMove(speed * direction);
@@ -78,9 +72,6 @@ public class PlayerController : MonoBehaviour {
 					//and we turn it into a modifier 0 to 1, 1 being closer to the player, and 0 being at pushRadius
 					modifier = 1f - Mathf.Clamp01(modifier / pushRadius);
 					snowBall.AddForce(modifier * ballPush * pushDirection, ForceMode.Acceleration);
-					
-					float value = (modifier * ballPush * pushDirection).magnitude;
-					slider.value = value;
 				}
 			}
 		}
