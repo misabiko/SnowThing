@@ -1,20 +1,23 @@
 ﻿using UnityEngine;
-using UnityTemplateProjects;
 
 public class SnowBall : MonoBehaviour {
 	Vector2 lastPos;
 	float deltaPos;
-	float radius;
+	new Rigidbody rigidbody;
 
 	public LowPolyTerrain terrain;
+	public float radius {get; private set;}
 	public float drawStep = 0.5f;
+	public float growthRate = 0.01f;
+	public float digDepth = 0.2f;
+	public float digRadius = 1f;
 
 	void Start() {
 		if (terrain == null)
 			Debug.LogError("LowPolyTerrain wasn't set in SnowBall.");
+		rigidbody = GetComponent<Rigidbody>();
 		
 		lastPos = Helper.RemoveY(transform.position);
-
 		radius = transform.localScale.y / 2;
 	}
 
@@ -27,8 +30,19 @@ public class SnowBall : MonoBehaviour {
 
 		if (deltaPos > drawStep) {
 			deltaPos -= drawStep;
-			
-			terrain.DrawHeight(pos + radius * Vector3.down, -0.05f, 0.5f);
+			AmassSnow();
 		}
+	}
+
+	void AmassSnow() {
+		transform.localScale += growthRate * Vector3.one;
+		radius += growthRate / 2;
+		
+		terrain.DrawHeight(transform.position + radius * Vector3.down, -digDepth * radius, digRadius * radius);
+	}
+
+
+	public void Push(Vector3 pushForce) {
+		rigidbody.AddForce(pushForce, ForceMode.Acceleration);
 	}
 }
