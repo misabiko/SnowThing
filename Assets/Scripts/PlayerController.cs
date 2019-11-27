@@ -67,7 +67,7 @@ public class PlayerController : MonoBehaviour {
 		if (moveInput != Vector2.zero) {
 			Vector3 moveDirection = camTransform.forward * moveInput.y + camTransform.right * moveInput.x;
 			characterController.SimpleMove(speed * moveDirection);
-			
+
 			if (snowBall) {
 				Vector2 pushDirection2d = Helper.RemoveY(snowBall.transform.position) - Helper.RemoveY(transform.position);
 				Vector3 pushDirection3d = new Vector3(pushDirection2d.x, 0f, pushDirection2d.y);
@@ -82,5 +82,7 @@ public class PlayerController : MonoBehaviour {
 				}
 			}
 		}
+		else
+			characterController.SimpleMove(Vector3.zero);
 	}
 }
