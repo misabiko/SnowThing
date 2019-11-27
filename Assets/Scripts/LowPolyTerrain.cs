@@ -6,6 +6,7 @@ public class LowPolyTerrain : MonoBehaviour {
 	Mesh mesh;
 	Vector3[] vertices;
 	int[] triangles;
+	public MeshCollider meshCollider {get; private set;}
 
 	public float resolution = 0.75f;
 	public int xSize = 75;
@@ -15,9 +16,9 @@ public class LowPolyTerrain : MonoBehaviour {
 		UpdateTerrain();
 	}
 
-	void OnValidate() {
+	/*void OnValidate() {
 		UpdateTerrain();
-	}
+	}*/
 
 	void UpdateTerrain() {
 		InitMesh();
@@ -32,6 +33,8 @@ public class LowPolyTerrain : MonoBehaviour {
 		
 		mesh = new Mesh();
 		GetComponent<MeshFilter>().mesh = mesh;
+		if (!meshCollider)
+			meshCollider = GetComponent<MeshCollider>();
 	}
 
 	void CreateShape() {
@@ -85,7 +88,7 @@ public class LowPolyTerrain : MonoBehaviour {
 		
 		mesh.RecalculateNormals();
 		
-		GetComponent<MeshCollider>().sharedMesh = mesh;
+		meshCollider.sharedMesh = mesh;
 	}
 
 	public void DrawHeight(Vector3 position, float height, float radius) {

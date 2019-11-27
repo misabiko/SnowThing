@@ -1,5 +1,6 @@
 ﻿using Cinemachine;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(CharacterController))]
@@ -8,10 +9,13 @@ public class PlayerController : MonoBehaviour {
 	CharacterController characterController;
 	PlayerInput playerInput;
 	InputAction lookAction;
+	InputAction jumpAction;
 	Vector2 moveInput;
+	Vector3 moveDirection;
 	Material material;
 	Color defaultColor;
 	SnowBall snowBall;
+	float angleVelocity;
 
 	public CinemachineFreeLook cam;
 	public Transform camTransform;
@@ -20,9 +24,13 @@ public class PlayerController : MonoBehaviour {
 
 	public Interacter interacter;
 	public SnowTerrain terrain;
+	public Transform snowBallParent;
 	public GameObject snowBallPrefab;
 	
 	public float speed = 5f;
+	public float jumpForce = 1f;
+	public float angleSmooth = 0.3f;
+	public float gravityModifier = 1.5f;
 
 	public float ballPush = 50f;
 	public float pushRadius = 3f;
@@ -53,6 +61,7 @@ public class PlayerController : MonoBehaviour {
 		
 		playerInput.actions["Push"].started += OnPushStart;
 		playerInput.actions["Push"].canceled += OnPushStop;
+		playerInput.actions["Jump"].performed += OnJump;
 
 		playerInput.actions["Interact"].performed += OnInteract;
 
@@ -76,11 +85,17 @@ public class PlayerController : MonoBehaviour {
 		material.SetColor(BaseColor, defaultColor);
 	}
 
+	void OnJump(InputAction.CallbackContext context) {
+		if (characterController.isGrounded)
+			moveDirection.y = jumpForce;
+	}
+
 	void OnInteract(InputAction.CallbackContext context) {
 		Vector3 spawnPos = transform.position + transform.forward + 0.5f * Vector3.down;
-		terrain.DrawHeight(spawnPos, -.5f, .5f);
+		terrain.DrawHeight(spawnPos, -.25f, .25f);
 
 		GameObject gameObject = Instantiate(snowBallPrefab, spawnPos, Quaternion.identity);
+		gameObject.transform.parent = snowBallParent;
 		gameObject.GetComponent<SnowBall>().terrain = terrain;
 	}
 
@@ -91,18 +106,32 @@ public class PlayerController : MonoBehaviour {
 			cam.m_YAxis.Value -= camYSensitivity * lookInput.y;
 		}
 
+		moveDirection.x = 0f;
+		moveDirection.z = 0f;
+		
+		float oldY = moveDirection.y;
+		
 		if (moveInput != Vector2.zero) {
-			Vector3 moveDirection = camTransform.forward * moveInput.y + camTransform.right * moveInput.x;
-			characterController.SimpleMove(speed * moveDirection);
+			moveDirection = Helper.Flatten(camTransform.forward * moveInput.y + camTransform.right * moveInput.x);
+			moveDirection *= speed;
+
+			float diffAngle = Vector3.SignedAngle(transform.forward, moveDirection, Vector3.up);
+			transform.Rotate(Vector3.up, diffAngle / angleSmooth);
 
 			PushSnowBall(moveDirection);
-		}else
-			characterController.SimpleMove(Vector3.zero);
+		}
+
+		if (!characterController.isGrounded || oldY > 0f)
+			moveDirection.y = oldY;
+
+		moveDirection += Time.deltaTime * gravityModifier * Physics.gravity;
+		characterController.Move(moveDirection * Time.deltaTime);
 	}
 
 	void PushSnowBall(Vector3 moveDirection) {
 		if (!snowBall) return;
 		
+		moveDirection.Normalize();
 		Vector2 pushDirection2d = Helper.RemoveY(snowBall.transform.position) - Helper.RemoveY(transform.position);
 		Vector3 pushDirection3d = new Vector3(pushDirection2d.x, 0f, pushDirection2d.y);
 		Vector2 moveDirection2d = Helper.RemoveY(moveDirection);
