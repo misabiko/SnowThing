@@ -19,6 +19,8 @@ public class PlayerController : MonoBehaviour {
 	public float camXSensitivity = 2f;
 
 	public Interacter interacter;
+	public SnowTerrain terrain;
+	public GameObject snowBallPrefab;
 	
 	public float speed = 5f;
 
@@ -40,6 +42,10 @@ public class PlayerController : MonoBehaviour {
 			Debug.LogError("Camera transform (Main Camera) wasn't set on PlayerController.");
 		if (!interacter)
 			Debug.LogError("Interacter wasn't set on PlayerController.");
+		if (!terrain)
+			Debug.LogError("SnowTerrain wasn't set on PlayerController.");
+		if (!snowBallPrefab)
+			Debug.LogError("The SnowBall Prefab wasn't set on PlayerController.");
 
 		playerInput.actions["Move"].started += OnMove;
 		playerInput.actions["Move"].performed += OnMove;
@@ -47,6 +53,8 @@ public class PlayerController : MonoBehaviour {
 		
 		playerInput.actions["Push"].started += OnPushStart;
 		playerInput.actions["Push"].canceled += OnPushStop;
+
+		playerInput.actions["Interact"].performed += OnInteract;
 
 		lookAction = playerInput.actions["Look"];
 	}
@@ -66,6 +74,14 @@ public class PlayerController : MonoBehaviour {
 		snowBall = null;
 		
 		material.SetColor(BaseColor, defaultColor);
+	}
+
+	void OnInteract(InputAction.CallbackContext context) {
+		Vector3 spawnPos = transform.position + transform.forward + 0.5f * Vector3.down;
+		terrain.DrawHeight(spawnPos, -.5f, .5f);
+
+		GameObject gameObject = Instantiate(snowBallPrefab, spawnPos, Quaternion.identity);
+		gameObject.GetComponent<SnowBall>().terrain = terrain;
 	}
 
 	void Update() {
