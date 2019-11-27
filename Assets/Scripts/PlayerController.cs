@@ -9,42 +9,41 @@ public class PlayerController : MonoBehaviour {
 	PlayerInput playerInput;
 	InputAction lookAction;
 	Vector2 moveInput;
-	Material ballMaterial;
-	Color ballColor;
-	static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
+	Material material;
+	Color defaultColor;
 
 	public CinemachineFreeLook cam;
 	public Transform camTransform;
-	public float speed = 10f;
-	//public Dictionary<
 	public float camYSensitivity = 0.01f;
 	public float camXSensitivity = 2f;
-	public float ballPush = 10f;
-	public float pushRadius = 1f;
-	public float pushAngle = 15f;
+	
+	public float speed = 5f;
+
 	public SnowBall snowBall;
+	public float ballPush = 50f;
+	public float pushRadius = 3f;
+	public float pushAngle = 45f;
+	
+	static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
 
 	void Start() {
 		characterController = GetComponent<CharacterController>();
 		playerInput = GetComponent<PlayerInput>();
+		material = GetComponent<Renderer>().material;
+		defaultColor = material.GetColor(BaseColor);
+		
 		if (cam == null)
 			Debug.LogError("FreeLook camera wasn't set on PlayerController.");
 		if (camTransform == null)
 			Debug.LogError("Camera transform (Main Camera) wasn't set on PlayerController.");
-		if (snowBall) {
-			ballMaterial = snowBall.GetComponent<Renderer>().material;
-			ballColor = ballMaterial.GetColor(BaseColor);
-		}
 
 		playerInput.actions["Move"].started += OnMove;
 		playerInput.actions["Move"].performed += OnMove;
 		playerInput.actions["Move"].canceled += OnMove;
-		playerInput.actions["Fire"].performed += OnFire;
+		playerInput.actions["Push"].started += OnPushStart;
+		playerInput.actions["Push"].canceled += OnPushStop;
 
 		lookAction = playerInput.actions["Look"];
-
-		playerInput.onDeviceLost += input => Debug.Log("Device lost");
-		playerInput.onDeviceRegained += input => Debug.Log("Device regained");
 	}
 
 	void OnMove(InputAction.CallbackContext context) {
@@ -52,8 +51,12 @@ public class PlayerController : MonoBehaviour {
 		moveInput = input.normalized;
 	}
 
-	void OnFire(InputAction.CallbackContext context) {
-		Debug.Log("OnFire: " + context.valueType);
+	void OnPushStart(InputAction.CallbackContext context) {
+		material.SetColor(BaseColor, Color.red);
+	}
+
+	void OnPushStop(InputAction.CallbackContext context) {
+		material.SetColor(BaseColor, defaultColor);
 	}
 
 	void Update() {
@@ -63,7 +66,6 @@ public class PlayerController : MonoBehaviour {
 			cam.m_YAxis.Value -= camYSensitivity * lookInput.y;
 		}
 
-		ballMaterial.SetColor(BaseColor, ballColor);
 		if (moveInput != Vector2.zero) {
 			Vector3 moveDirection = camTransform.forward * moveInput.y + camTransform.right * moveInput.x;
 			characterController.SimpleMove(speed * moveDirection);
@@ -77,8 +79,6 @@ public class PlayerController : MonoBehaviour {
 					//TODO make that readable
 					float modifier = 1f - Mathf.Clamp01(Vector2.Dot(pushDirection2d, moveDirection2d) / (pushRadius + snowBall.radius));
 					snowBall.Push(modifier * ballPush * pushDirection3d.normalized);
-
-					ballMaterial.SetColor(BaseColor, Color.blue);
 				}
 			}
 		}
