@@ -125,5 +125,5 @@ MonoBehaviour:
   terrain: {fileID: 0}
   drawStep: 0.5
   growthRate: 0.01
-  digDepth: 0.25
-  digForce: 0.2
+  digDepth: 0.5
+  digForce: 0.5
