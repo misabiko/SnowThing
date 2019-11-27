@@ -1,10 +1,12 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using Random = UnityEngine.Random;
 
 public class SnowTerrain : LowPolyTerrain {
 	[Range(0f, 0.5f - float.Epsilon)]
 	public float hDisplacement = 0.1f;
+	[Range(0f, 1f)]
+	public float vDisplacement = 0.1f;
+	
 	[Range(float.Epsilon, 10f)]
 	public float amplitude = 1f;
 	[Range(float.Epsilon, 1f)]
@@ -17,6 +19,7 @@ public class SnowTerrain : LowPolyTerrain {
 		}
 
 		source.y += amplitude * (Mathf.PerlinNoise(frequency * source.x + xSize, frequency * source.z + zSize) - 0.5f);
+		source.y += vDisplacement * (Random.value - 0.5f);
 
 		return source;
 	}
