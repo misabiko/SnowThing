@@ -1,14 +1,15 @@
 ﻿using UnityEngine;
 
+[RequireComponent(typeof(MeshCollider))]
 [RequireComponent(typeof(MeshFilter))]
 public class LowPolyTerrain : MonoBehaviour {
 	Mesh mesh;
 	Vector3[] vertices;
 	int[] triangles;
 
-	public float resolution = 0.25f;
-	public int xSize = 250;
-	public int zSize = 250;
+	public float resolution = 0.75f;
+	public int xSize = 75;
+	public int zSize = 75;
 	
 	void Start() {
 		UpdateTerrain();
@@ -40,10 +41,16 @@ public class LowPolyTerrain : MonoBehaviour {
 		float halfZSize = ((float) zSize) / 2;
 		for (int z = 0, i = 0; z <= zSize; z++)
 			for (int x = 0; x <= xSize; x++) {
-				vertices[i] = new Vector3(x - halfXSize, 0, z - halfZSize) * resolution;
+				vertices[i] = ModifyVertex(new Vector3(x - halfXSize, 0, z - halfZSize) * resolution);
 				i++;
 			}
 
+		InitTriangles();
+	}
+
+	protected virtual Vector3 ModifyVertex(Vector3 source) => source;
+
+	void InitTriangles() {
 		triangles = new int[6 * xSize * zSize];
 		int vert = 0;
 		int tris = 0;
