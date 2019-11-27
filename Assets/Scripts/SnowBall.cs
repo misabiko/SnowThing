@@ -10,7 +10,7 @@ public class SnowBall : MonoBehaviour {
 	public float drawStep = 0.5f;
 	public float growthRate = 0.01f;
 	public float digDepth = 0.2f;
-	public float digRadius = 1f;
+	public float digForce = 0.2f;
 
 	void Start() {
 		if (terrain == null)
@@ -38,7 +38,7 @@ public class SnowBall : MonoBehaviour {
 		transform.localScale += growthRate * Vector3.one;
 		radius += growthRate / 2;
 		
-		terrain.DrawHeight(transform.position + radius * Vector3.down, -digDepth * radius, digRadius * radius);
+		terrain.DrawHeight(transform.position + digDepth * radius * Vector3.down, -digForce * radius, radius);
 	}
 
 
