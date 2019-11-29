@@ -126,5 +126,5 @@ MonoBehaviour:
   drawStep: 0.25
   growthRate: 0.01
   digDepth: 0.5
-  digForce: 0.3
+  digForce: 0.1
   crushedHeight: 2

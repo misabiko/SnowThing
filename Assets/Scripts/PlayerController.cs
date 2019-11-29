@@ -38,6 +38,9 @@ public class PlayerController : MonoBehaviour {
 	public float pushAngle = 45f;
 	public float throwForce = 5f;
 	
+	public Transform leftArm;
+	public Transform rightArm;
+	
 	static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
 
 	void Start() {
@@ -90,6 +93,8 @@ public class PlayerController : MonoBehaviour {
 	void OnPushStop(InputAction.CallbackContext context) {
 		snowBall = null;
 		
+		ResetArms();
+		
 		//material.SetColor(BaseColor, defaultColor);
 	}
 
@@ -139,6 +144,8 @@ public class PlayerController : MonoBehaviour {
 		pickedUpSnowBall.transform.parent = transform;
 		pickedUpSnowBall.transform.position = transform.position + (1f + pickedUpSnowBall.radius) * Vector3.up;
 		interacter.Remove(pickedUpSnowBall);
+		
+		ArmsUpward();
 	}
 
 	void Throw() {
@@ -146,6 +153,8 @@ public class PlayerController : MonoBehaviour {
 		pickedUpSnowBall.transform.parent = snowBallParent;
 		pickedUpSnowBall.Throw((throwForce / pickedUpSnowBall.radius) * (transform.forward + Vector3.up));
 		pickedUpSnowBall = null;
+		
+		ResetArms();
 	}
 
 	void Update() {
@@ -191,5 +200,21 @@ public class PlayerController : MonoBehaviour {
 		//TODO make that readable
 		float modifier = 1f - Mathf.Clamp01(Vector2.Dot(pushDirection2d, moveDirection2d) / (pushRadius + snowBall.radius));
 		snowBall.Push(modifier * ballPush * pushDirection3d.normalized);
+		
+		AimArms();
+	}
+
+	void AimArms() {
+		//Vector3.Angle(Vector3.down, snowBall.transform.position - arm.position);
+		leftArm.rotation = Quaternion.FromToRotation(-leftArm.up, snowBall.transform.position - leftArm.position) * leftArm.rotation;
+		rightArm.rotation = Quaternion.FromToRotation(-rightArm.up, snowBall.transform.position - rightArm.position) * rightArm.rotation;
+	}
+
+	void ResetArms() {
+		leftArm.rotation = rightArm.rotation = Quaternion.identity;
+	}
+
+	void ArmsUpward() {
+		rightArm.rotation = leftArm.rotation = Quaternion.FromToRotation(Vector3.down, Vector3.up);
 	}
 }
