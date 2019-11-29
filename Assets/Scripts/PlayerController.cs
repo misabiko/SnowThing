@@ -15,6 +15,7 @@ public class PlayerController : MonoBehaviour {
 	Material material;
 	Color defaultColor;
 	SnowBall snowBall;
+	SnowBall pickedUpSnowBall;
 	float angleVelocity;
 
 	public CinemachineFreeLook cam;
@@ -35,6 +36,7 @@ public class PlayerController : MonoBehaviour {
 	public float ballPush = 50f;
 	public float pushRadius = 3f;
 	public float pushAngle = 45f;
+	public float throwForce = 5f;
 	
 	static readonly int BaseColor = Shader.PropertyToID("_BaseColor");
 
@@ -65,6 +67,10 @@ public class PlayerController : MonoBehaviour {
 
 		playerInput.actions["Interact"].performed += OnInteract;
 
+		playerInput.actions["Crush"].performed += OnCrush;
+
+		playerInput.actions["Pickup"].performed += OnPickup;
+
 		lookAction = playerInput.actions["Look"];
 	}
 
@@ -74,15 +80,17 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnPushStart(InputAction.CallbackContext context) {
+		if (pickedUpSnowBall) return;
+		
 		snowBall = interacter.GetSnowBall();
 		
-		material.SetColor(BaseColor, Color.red);
+		//material.SetColor(BaseColor, Color.red);
 	}
 
 	void OnPushStop(InputAction.CallbackContext context) {
 		snowBall = null;
 		
-		material.SetColor(BaseColor, defaultColor);
+		//material.SetColor(BaseColor, defaultColor);
 	}
 
 	void OnJump(InputAction.CallbackContext context) {
@@ -91,12 +99,53 @@ public class PlayerController : MonoBehaviour {
 	}
 
 	void OnInteract(InputAction.CallbackContext context) {
+		if (pickedUpSnowBall) return;
+		
 		Vector3 spawnPos = transform.position + transform.forward + 0.5f * Vector3.down;
 		terrain.DrawHeight(spawnPos, -.25f, .25f);
 
 		GameObject gameObject = Instantiate(snowBallPrefab, spawnPos, Quaternion.identity);
 		gameObject.transform.parent = snowBallParent;
 		gameObject.GetComponent<SnowBall>().terrain = terrain;
+	}
+
+	void OnCrush(InputAction.CallbackContext context) {
+		if (pickedUpSnowBall) return;
+		
+		if (!snowBall)
+			snowBall = interacter.GetSnowBall();
+
+		if (!snowBall) return;
+		
+		interacter.Remove(snowBall);
+		snowBall.Crush();
+		snowBall = null;
+	}
+
+	void OnPickup(InputAction.CallbackContext context) {
+		if (pickedUpSnowBall)
+			Throw();
+		else
+			Pickup();
+	}
+
+	void Pickup() {
+		pickedUpSnowBall = snowBall ? snowBall : interacter.GetSnowBall();
+		snowBall = null;
+
+		if (!pickedUpSnowBall) return;
+		
+		pickedUpSnowBall.DisableCollider();
+		pickedUpSnowBall.transform.parent = transform;
+		pickedUpSnowBall.transform.position = transform.position + (1f + pickedUpSnowBall.radius) * Vector3.up;
+		interacter.Remove(pickedUpSnowBall);
+	}
+
+	void Throw() {
+		pickedUpSnowBall.EnableCollider();
+		pickedUpSnowBall.transform.parent = snowBallParent;
+		pickedUpSnowBall.Throw((throwForce / pickedUpSnowBall.radius) * (transform.forward + Vector3.up));
+		pickedUpSnowBall = null;
 	}
 
 	void Update() {

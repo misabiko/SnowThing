@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 [RequireComponent(typeof(MeshCollider))]
 [RequireComponent(typeof(MeshFilter))]
@@ -97,6 +98,25 @@ public class LowPolyTerrain : MonoBehaviour {
 		for (int i = 0; i < vertices.Length; i++) {
 			if ((vertices[i] - position).sqrMagnitude <= radiusSquared)
 				vertices[i].y += height;
+		}
+		
+		UpdateMesh(false);
+	}
+
+	public void DrawHeightSmooth(Vector3 position, float height, float radius) {
+		float radiusSquared = radius * radius;
+		List<int> indexes = new List<int>();
+		float averageY = 0f;
+		
+		for (int i = 0; i < vertices.Length; i++)
+			if ((vertices[i] - position).sqrMagnitude <= radiusSquared) {
+				indexes.Add(i);
+				averageY += vertices[i].y + height;
+			}
+
+		averageY /= indexes.Count;
+		foreach (int index in indexes) {
+			vertices[index].y = averageY;
 		}
 		
 		UpdateMesh(false);

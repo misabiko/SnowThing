@@ -18,7 +18,7 @@ public class SnowTerrain : LowPolyTerrain {
 			source.z += hDisplacement * (Random.value - 0.5f);
 		}
 
-		//source.y += amplitude * (Mathf.PerlinNoise(frequency * source.x + xSize, frequency * source.z + zSize) - 0.5f);
+		source.y += amplitude * (Mathf.PerlinNoise(frequency * source.x + xSize, frequency * source.z + zSize) - 0.5f);
 		source.y += vDisplacement * (Random.value - 0.5f);
 
 		//source.y += source.x * 0.75f;

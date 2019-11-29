@@ -10,7 +10,7 @@ public class Interacter : MonoBehaviour {
 		SnowBall snowBall = other.GetComponent<SnowBall>();
 		if (!snowBall) return;
 		
-		snowBall.GetComponent<Renderer>().material.SetColor("_BaseColor", Color.cyan);
+		//snowBall.GetComponent<Renderer>().material.SetColor("_BaseColor", Color.cyan);
 
 		snowBalls.Add(snowBall);
 	}
@@ -19,7 +19,7 @@ public class Interacter : MonoBehaviour {
 		SnowBall snowBall = other.GetComponent<SnowBall>();
 		if (!snowBall) return;
 		
-		snowBall.GetComponent<Renderer>().material.SetColor("_BaseColor", Color.white);
+		//snowBall.GetComponent<Renderer>().material.SetColor("_BaseColor", Color.white);
 
 		snowBalls.Remove(snowBall);
 	}
@@ -45,5 +45,9 @@ public class Interacter : MonoBehaviour {
 			Helper.RemoveY(transform.forward),
 			Helper.RemoveY(snowBall.transform.position - transform.position)
 		);
+	}
+
+	public void Remove(SnowBall snowBall) {
+		snowBalls.Remove(snowBall);
 	}
 }
